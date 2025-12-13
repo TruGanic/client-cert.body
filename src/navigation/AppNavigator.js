@@ -2,7 +2,8 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AgentLoginScreen from '../screens/AgentLoginScreen';
 import AgentRegistrationScreen from '../screens/AgentRegistrationScreen';
-import MyFarmersDashboard from '../screens/MyFarmersDashboard';
+import AgentDashboard from '../screens/AgentDashboard';
+import InspectionReportScreen from '../screens/InspectionReportScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,13 +25,22 @@ const AppNavigator = () => {
                 }}
             />
             <Stack.Screen
-                name="MyFarmersDashboard"
-                component={MyFarmersDashboard}
+                name="AgentDashboard"
+                component={AgentDashboard}
                 options={{
                     title: 'Dashboard',
                     headerStyle: { backgroundColor: '#003366' },
                     headerTintColor: '#ffffff',
                     headerBackVisible: false, // Prevent going back to login
+                }}
+            />
+            <Stack.Screen
+                name="InspectionReport"
+                component={InspectionReportScreen}
+                options={{
+                    title: 'Back to Dashboard',
+                    headerStyle: { backgroundColor: '#f8fafc' },
+                    headerTintColor: '#003366',
                 }}
             />
         </Stack.Navigator>

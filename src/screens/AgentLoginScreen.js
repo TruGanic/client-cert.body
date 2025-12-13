@@ -11,7 +11,7 @@ const AgentLoginScreen = () => {
     const handleLogin = () => {
         console.log('Login Attempt:', { email });
         // Navigate to Dashboard on success (mock)
-        navigation.replace('MyFarmersDashboard', { agentName: 'John Doe' });
+        navigation.replace('AgentDashboard', { agentName: 'Amal' });
     };
 
     return (
@@ -30,7 +30,7 @@ const AgentLoginScreen = () => {
                     <Text className="text-[#003366] font-bold mb-2 ml-1">Professional Email</Text>
                     <TextInput
                         className="bg-white border border-slate-300 rounded-lg p-4 text-slate-800 shadow-sm"
-                        placeholder="agent.name@controlunion.com"
+                        placeholder="amal@controlunion.com"
                         placeholderTextColor="#94a3b8"
                         value={email}
                         onChangeText={setEmail}

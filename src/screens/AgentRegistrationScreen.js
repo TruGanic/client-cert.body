@@ -39,7 +39,7 @@ const AgentRegistrationScreen = () => {
                     <Text className="text-[#003366] font-bold mb-2 ml-1">Full Name</Text>
                     <TextInput
                         className="bg-white border border-slate-300 rounded-lg p-4 text-slate-800 shadow-sm"
-                        placeholder="e.g. John Doe"
+                        placeholder="e.g. Amal Perera"
                         value={fullName}
                         onChangeText={setFullName}
                     />

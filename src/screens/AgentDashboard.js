@@ -15,7 +15,7 @@ const ASSIGNED_FARMERS = [
 
 const MyFarmersDashboard = ({ route }) => {
     const navigation = useNavigation();
-    const { agentName } = route.params || { agentName: 'Kamal' };
+    const { agentName } = route.params || { agentName: 'Amal' };
     const [filter, setFilter] = useState('All');
 
     const filteredFarmers = ASSIGNED_FARMERS.filter(farmer => {
@@ -31,6 +31,7 @@ const MyFarmersDashboard = ({ route }) => {
 
     const handleViewReport = (farmName) => {
         console.log(`Navigating to Inspection for ${farmName}`);
+        navigation.navigate('InspectionReport', { farmName });
     };
 
     const renderFarmerCard = ({ item }) => {

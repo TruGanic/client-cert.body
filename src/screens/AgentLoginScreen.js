@@ -11,7 +11,7 @@ const AgentLoginScreen = () => {
     const handleLogin = () => {
         console.log('Login Attempt:', { email });
         // Navigate to Dashboard on success (mock)
-        navigation.replace('MyFarmersDashboard');
+        navigation.replace('MyFarmersDashboard', { agentName: 'John Doe' });
     };
 
     return (

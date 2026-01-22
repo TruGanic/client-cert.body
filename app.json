@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "client-cert.body",
-    "slug": "client-cert.body",
+    "slug": "client-cert-body",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

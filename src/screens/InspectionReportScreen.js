@@ -81,7 +81,9 @@ const InspectionReportScreen = () => {
                 <Text className="text-[#003366] font-bold text-lg mb-4">Compliance Check</Text>
 
                 <View className="flex-row items-center mb-3">
-                    <Activity color="#ef4444" size={18} className="mr-3" />
+                    <View className="mr-3">
+                        <Activity color="#ef4444" size={18} />
+                    </View>
                     <View>
                         <Text className="text-slate-500 text-xs">Sensor Data</Text>
                         <Text className="text-slate-800 font-medium">High N Spike (Rapid Release)</Text>
@@ -93,7 +95,9 @@ const InspectionReportScreen = () => {
                 </View>
 
                 <View className="flex-row items-center mb-4">
-                    <FileTextIcon color="#64748b" size={18} className="mr-3" />
+                    <View className="mr-3">
+                        <FileTextIcon color="#64748b" size={18} />
+                    </View>
                     <View>
                         <Text className="text-slate-500 text-xs">Farmer Log</Text>
                         <Text className="text-slate-800 font-medium">No inputs recorded for Oct 12</Text>
@@ -126,10 +130,10 @@ const InspectionReportScreen = () => {
 };
 
 // Helper for the missing icon in the conflict box
-const FileTextIcon = (props) => (
-    <View {...props} style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center' }}>
-        <View style={{ width: 12, height: 14, borderWidth: 1.5, borderColor: props.color || '#64748b', borderRadius: 2 }} />
-        <View style={{ width: 6, height: 1, backgroundColor: props.color || '#64748b', position: 'absolute' }} />
+const FileTextIcon = ({ color = '#64748b' }) => (
+    <View style={{ width: 18, height: 18, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ width: 12, height: 14, borderWidth: 1.5, borderColor: color, borderRadius: 2 }} />
+        <View style={{ width: 6, height: 1, backgroundColor: color, position: 'absolute' }} />
     </View>
 );
 

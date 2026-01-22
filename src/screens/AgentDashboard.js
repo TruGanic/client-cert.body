@@ -47,7 +47,15 @@ const MyFarmersDashboard = ({ route }) => {
                     </View>
 
                     <View className={`px-3 py-1 rounded-full flex-row items-center ${isCritical ? 'bg-red-100' : 'bg-green-100'}`}>
-                        {isCritical ? <AlertTriangle size={14} color="#ef4444" className="mr-1" /> : <CheckCircle size={14} color="#16a34a" className="mr-1" />}
+                        {isCritical ? (
+                            <View className="mr-1">
+                                <AlertTriangle size={14} color="#ef4444" />
+                            </View>
+                        ) : (
+                            <View className="mr-1">
+                                <CheckCircle size={14} color="#16a34a" />
+                            </View>
+                        )}
                         <Text className={`text-xs font-bold ${isCritical ? 'text-red-700' : 'text-green-700'}`}>
                             {isCritical ? 'ANOMALY DETECTED' : 'Verified'}
                         </Text>
@@ -56,7 +64,9 @@ const MyFarmersDashboard = ({ route }) => {
 
                 {isCritical && (
                     <View className="mt-3 bg-red-50 p-2 rounded-md border border-red-100 flex-row items-center">
-                        <AlertTriangle size={16} color="#ef4444" className="mr-2" />
+                        <View className="mr-2">
+                            <AlertTriangle size={16} color="#ef4444" />
+                        </View>
                         <Text className="text-red-600 text-sm font-medium">AI detected synthetic nitrogen spike</Text>
                     </View>
                 )}
@@ -67,7 +77,9 @@ const MyFarmersDashboard = ({ route }) => {
                         className="flex-row items-center bg-[#003366] px-3 py-2 rounded-md active:bg-[#002244]"
                         onPress={() => handleViewReport(item.farmName)}
                     >
-                        <FileText size={14} color="white" className="mr-2" />
+                        <View className="mr-2">
+                            <FileText size={14} color="white" />
+                        </View>
                         <Text className="text-white text-xs font-bold">View Report</Text>
                     </TouchableOpacity>
                 </View>

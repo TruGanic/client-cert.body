@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { UserPlus } from 'lucide-react-native';
+import axios from 'axios';
+
+// Emulator localhost maps to 10.0.2.2. Change to your computer's IP if testing on real device.
+const API_URL = 'http://10.0.2.2:3001/api/agents';
 
 const AgentRegistrationScreen = () => {
     const navigation = useNavigation();
@@ -10,18 +14,50 @@ const AgentRegistrationScreen = () => {
     const [assignedRegion, setAssignedRegion] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
-    const handleRegister = () => {
-        const registrationData = {
-            fullName,
-            email,
-            assignedRegion,
-            // In a real app, passwords would be hashed/handled securely
-        };
-        console.log('Registration Data:', JSON.stringify(registrationData, null, 2));
+    const handleRegister = async () => {
+        // Basic validation
+        if (!fullName || !email || !password || !confirmPassword) {
+            setErrorMessage('Please fill in all required fields.');
+            return;
+        }
 
-        // Mock successful registration
-        navigation.goBack();
+        if (password !== confirmPassword) {
+            setErrorMessage('Passwords do not match.');
+            return;
+        }
+
+        setErrorMessage('');
+        setLoading(true);
+
+        try {
+            const registrationData = {
+                fullName,
+                email,
+                assignedRegion,
+                password
+            };
+
+            const response = await axios.post(`${API_URL}/register`, registrationData);
+            
+            console.log('Registration Success:', response.data);
+            Alert.alert(
+                "Registration Successful",
+                "Your agent portal account has been created.",
+                [{ text: "OK", onPress: () => navigation.goBack() }]
+            );
+
+        } catch (error) {
+            console.error('Registration Error:', error.response?.data || error.message);
+            setErrorMessage(
+                error.response?.data?.error || 
+                'An error occurred during registration. Please try again later.'
+            );
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -35,6 +71,12 @@ const AgentRegistrationScreen = () => {
             </View>
 
             <View className="space-y-5 mb-10">
+                {errorMessage ? (
+                    <View className="bg-red-100 p-3 rounded-lg border border-red-200 mb-2">
+                        <Text className="text-red-700 text-center">{errorMessage}</Text>
+                    </View>
+                ) : null}
+
                 <View>
                     <Text className="text-[#003366] font-bold mb-2 ml-1">Full Name</Text>
                     <TextInput
@@ -91,10 +133,16 @@ const AgentRegistrationScreen = () => {
                 </View>
 
                 <TouchableOpacity
-                    className="bg-[#003366] p-4 rounded-lg items-center mt-6 shadow-md active:bg-[#002244]"
+                    className={`p-4 rounded-lg items-center mt-6 shadow-md flex-row justify-center ${loading ? 'bg-slate-400' : 'bg-[#003366] active:bg-[#002244]'}`}
                     onPress={handleRegister}
+                    disabled={loading}
                 >
-                    <Text className="text-white font-bold text-lg">Complete Registration</Text>
+                    {loading ? (
+                        <ActivityIndicator color="white" className="mr-2" />
+                    ) : null}
+                    <Text className="text-white font-bold text-lg">
+                        {loading ? 'Registering...' : 'Complete Registration'}
+                    </Text>
                 </TouchableOpacity>
             </View>
         </ScrollView>

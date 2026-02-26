@@ -1,17 +1,51 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ShieldCheck } from 'lucide-react-native';
+import axios from 'axios';
+
+// Emulator localhost maps to 10.0.2.2. Change to your computer's IP if testing on real device.
+const API_URL = 'http://10.0.2.2:3001/api/agents';
 
 const AgentLoginScreen = () => {
     const navigation = useNavigation();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
-    const handleLogin = () => {
-        console.log('Login Attempt:', { email });
-        // Navigate to Dashboard on success (mock)
-        navigation.replace('AgentDashboard', { agentName: 'Amal' });
+    const handleLogin = async () => {
+        if (!email || !password) {
+            setErrorMessage('Please enter both email and password.');
+            return;
+        }
+
+        setErrorMessage('');
+        setLoading(true);
+
+        try {
+            const response = await axios.post(`${API_URL}/login`, {
+                email,
+                password
+            });
+
+            console.log('Login Success:', response.data);
+
+            // Navigate to Dashboard on success
+            // In a real app we would store the token (e.g., AsyncStorage) here
+            // const token = response.data.token;
+
+            navigation.replace('AgentDashboard', { agentName: response.data.profile.fullName });
+
+        } catch (error) {
+            console.error('Login Error:', error.response?.data || error.message);
+            setErrorMessage(
+                error.response?.data?.error ||
+                'Invalid credentials or network error. Please try again.'
+            );
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -26,6 +60,12 @@ const AgentLoginScreen = () => {
             </View>
 
             <View className="space-y-5">
+                {errorMessage ? (
+                    <View className="bg-red-100 p-3 rounded-lg border border-red-200 mb-2">
+                        <Text className="text-red-700 text-center">{errorMessage}</Text>
+                    </View>
+                ) : null}
+
                 <View>
                     <Text className="text-[#003366] font-bold mb-2 ml-1">Professional Email</Text>
                     <TextInput
@@ -52,10 +92,16 @@ const AgentLoginScreen = () => {
                 </View>
 
                 <TouchableOpacity
-                    className="bg-[#003366] p-4 rounded-lg items-center mt-6 shadow-md active:bg-[#002244]"
+                    className={`p-4 rounded-lg items-center mt-6 shadow-md flex-row justify-center ${loading ? 'bg-slate-400' : 'bg-[#003366] active:bg-[#002244]'}`}
                     onPress={handleLogin}
+                    disabled={loading}
                 >
-                    <Text className="text-white font-bold text-lg">Login</Text>
+                    {loading ? (
+                        <ActivityIndicator color="white" className="mr-2" />
+                    ) : null}
+                    <Text className="text-white font-bold text-lg">
+                        {loading ? 'Authenticating...' : 'Login'}
+                    </Text>
                 </TouchableOpacity>
 
                 <View className="flex-row justify-center mt-8">

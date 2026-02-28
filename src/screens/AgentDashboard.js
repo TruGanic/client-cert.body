@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LogOut, AlertTriangle, CheckCircle, ChevronRight, FileText } from 'lucide-react-native';
 import { apiClient } from '../config/apiConfig';
 
@@ -40,7 +41,11 @@ const MyFarmersDashboard = ({ route }) => {
                         setIsLoggingOut(true);
                         try {
                             await apiClient.post('/logout');
-                            // If using token storage, wipe it here: e.g., await AsyncStorage.removeItem('agentToken');
+
+                            // Wipe the token and profile from local storage to secure the device
+                            await AsyncStorage.removeItem('agentToken');
+                            await AsyncStorage.removeItem('agentProfile');
+
                             navigation.replace('AgentLogin');
                         } catch (error) {
                             setIsLoggingOut(false);

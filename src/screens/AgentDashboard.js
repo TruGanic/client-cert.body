@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { LogOut, AlertTriangle, CheckCircle, ChevronRight, FileText } from 'lucide-react-native';
+import { apiClient } from '../config/apiConfig';
 
 const ASSIGNED_FARMERS = [
     { id: '1', farmerName: 'Saman Kumara', farmName: 'Green Valley Estate', location: 'Badulla - Block A', status: 'COMPLIANT', lastSync: '10 mins ago' },
@@ -17,6 +18,7 @@ const MyFarmersDashboard = ({ route }) => {
     const navigation = useNavigation();
     const { agentName } = route.params || { agentName: 'Amal' };
     const [filter, setFilter] = useState('All');
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const filteredFarmers = ASSIGNED_FARMERS.filter(farmer => {
         if (filter === 'All') return true;
@@ -26,7 +28,29 @@ const MyFarmersDashboard = ({ route }) => {
     });
 
     const handleLogout = () => {
-        navigation.replace('AgentLogin');
+        Alert.alert(
+            "Logout",
+            "Are you sure you want to sign out?",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Logout",
+                    style: "destructive",
+                    onPress: async () => {
+                        setIsLoggingOut(true);
+                        try {
+                            await apiClient.post('/logout');
+                            // If using token storage, wipe it here: e.g., await AsyncStorage.removeItem('agentToken');
+                            navigation.replace('AgentLogin');
+                        } catch (error) {
+                            setIsLoggingOut(false);
+                            console.error('Logout API Error:', error);
+                            Alert.alert('Error', 'Failed to log out cleanly. Please check your connection.');
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     const handleViewReport = (farmName) => {
@@ -96,8 +120,12 @@ const MyFarmersDashboard = ({ route }) => {
                         <Text className="text-white text-2xl font-bold">Welcome, {agentName}</Text>
                         <Text className="text-slate-300 text-sm">Region: Uva Province</Text>
                     </View>
-                    <TouchableOpacity onPress={handleLogout} className="bg-white/10 p-2 rounded-full">
-                        <LogOut size={20} color="white" />
+                    <TouchableOpacity onPress={handleLogout} disabled={isLoggingOut} className="bg-white/10 p-2 rounded-full">
+                        {isLoggingOut ? (
+                            <ActivityIndicator size="small" color="white" />
+                        ) : (
+                            <LogOut size={20} color="white" />
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>

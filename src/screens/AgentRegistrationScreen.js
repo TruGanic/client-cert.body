@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { UserPlus } from 'lucide-react-native';
-import axios from 'axios';
-
-// Emulator localhost maps to 10.0.2.2. Change to your computer's IP if testing on real device.
-const API_URL = 'http://10.0.2.2:3001/api/agents';
+import { apiClient } from '../config/apiConfig';
 
 const AgentRegistrationScreen = () => {
     const navigation = useNavigation();
@@ -40,8 +37,8 @@ const AgentRegistrationScreen = () => {
                 password
             };
 
-            const response = await axios.post(`${API_URL}/register`, registrationData);
-            
+            const response = await apiClient.post('/register', registrationData);
+
             console.log('Registration Success:', response.data);
             Alert.alert(
                 "Registration Successful",
@@ -52,7 +49,7 @@ const AgentRegistrationScreen = () => {
         } catch (error) {
             console.error('Registration Error:', error.response?.data || error.message);
             setErrorMessage(
-                error.response?.data?.error || 
+                error.response?.data?.error ||
                 'An error occurred during registration. Please try again later.'
             );
         } finally {

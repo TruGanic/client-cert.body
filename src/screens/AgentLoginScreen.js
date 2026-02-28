@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ShieldCheck } from 'lucide-react-native';
 import { apiClient } from '../config/apiConfig';
 
@@ -28,9 +29,10 @@ const AgentLoginScreen = () => {
 
             console.log('Login Success:', response.data);
 
-            // Navigate to Dashboard on success
-            // In a real app we would store the token (e.g., AsyncStorage) here
-            // const token = response.data.token;
+            // Store the token and profile for persistent sessions
+            const token = response.data.token;
+            await AsyncStorage.setItem('agentToken', token);
+            await AsyncStorage.setItem('agentProfile', JSON.stringify(response.data.profile));
 
             navigation.replace('AgentDashboard', { agentName: response.data.profile.fullName });
 

@@ -2,10 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ShieldCheck } from 'lucide-react-native';
-import axios from 'axios';
-
-// Emulator localhost maps to 10.0.2.2. Change to your computer's IP if testing on real device.
-const API_URL = 'http://10.0.2.2:3001/api/agents';
+import { apiClient } from '../config/apiConfig';
 
 const AgentLoginScreen = () => {
     const navigation = useNavigation();
@@ -24,7 +21,7 @@ const AgentLoginScreen = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post(`${API_URL}/login`, {
+            const response = await apiClient.post('/login', {
                 email,
                 password
             });

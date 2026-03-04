@@ -1,27 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LogOut, AlertTriangle, CheckCircle, ChevronRight, FileText } from 'lucide-react-native';
 import { apiClient } from '../config/apiConfig';
-
-const ASSIGNED_FARMERS = [
-    { id: '1', farmerName: 'Saman Kumara', farmName: 'Green Valley Estate', location: 'Badulla - Block A', status: 'COMPLIANT', lastSync: '10 mins ago' },
-    { id: '2', farmerName: 'Anura Perera', farmName: 'Sunrise Organic Farm', location: 'Badulla - Block B', status: 'CRITICAL_ALERT', lastSync: '2 hours ago' },
-    { id: '3', farmerName: 'Kamal Gunaratne', farmName: 'Highland Spices', location: 'Bandarawela - Zone 1', status: 'COMPLIANT', lastSync: '1 day ago' },
-    { id: '4', farmerName: 'Nimali Silva', farmName: 'Silva Gardens', location: 'Ella - Zone 4', status: 'CRITICAL_ALERT', lastSync: '5 mins ago' },
-    { id: '5', farmerName: 'Ruwan Dissanaike', farmName: 'Golden Harvest', location: 'Haputale - Ridge', status: 'COMPLIANT', lastSync: '30 mins ago' },
-    { id: '6', farmerName: 'Sunil Shantha', farmName: 'Shantha Farms', location: 'Badulla - Block C', status: 'COMPLIANT', lastSync: '1 hour ago' },
-    { id: '7', farmerName: 'Mahesh Senanayake', farmName: 'Organic Roots', location: 'Welimada - Lowlands', status: 'COMPLIANT', lastSync: '3 days ago' },
-];
 
 const MyFarmersDashboard = ({ route }) => {
     const navigation = useNavigation();
     const { agentName } = route.params || { agentName: 'Amal' };
     const [filter, setFilter] = useState('All');
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+    const [farmers, setFarmers] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const filteredFarmers = ASSIGNED_FARMERS.filter(farmer => {
+    const fetchDashboardStats = async () => {
+        try {
+            setLoading(true);
+            const response = await apiClient.get('/dashboard-stats');
+            setFarmers(response.data);
+        } catch (error) {
+            console.error('Error fetching dashboard stats:', error);
+            Alert.alert('Error', 'Failed to fetch dashboard data.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            fetchDashboardStats();
+        });
+        return unsubscribe;
+    }, [navigation]);
+
+    const filteredFarmers = farmers.filter(farmer => {
         if (filter === 'All') return true;
         if (filter === 'Critical Risk') return farmer.status === 'CRITICAL_ALERT';
         if (filter === 'Compliant') return farmer.status === 'COMPLIANT';
@@ -58,9 +70,13 @@ const MyFarmersDashboard = ({ route }) => {
         );
     };
 
-    const handleViewReport = (farmName) => {
-        console.log(`Navigating to Inspection for ${farmName}`);
-        navigation.navigate('InspectionReport', { farmName });
+    const handleViewReport = (item) => {
+        console.log(`Navigating to Inspection for ${item.farmName}`);
+        navigation.navigate('InspectionReport', {
+            farmName: item.farmName,
+            batchId: item.batchId,
+            status: item.status
+        });
     };
 
     const renderFarmerCard = ({ item }) => {
@@ -71,7 +87,9 @@ const MyFarmersDashboard = ({ route }) => {
                 <View className="flex-row justify-between items-start">
                     <View className="flex-1">
                         <Text className="text-lg font-bold text-[#003366] mb-1">{item.farmName}</Text>
-                        <Text className="text-slate-600 font-medium mb-1">{item.farmerName}</Text>
+                        <Text className="text-slate-600 font-medium mb-1">
+                            {item.farmerName} • <Text className="text-slate-500 italic">{item.cropVariety}</Text>
+                        </Text>
                         <Text className="text-xs text-slate-400">{item.location}</Text>
                     </View>
 
@@ -96,7 +114,7 @@ const MyFarmersDashboard = ({ route }) => {
                         <View className="mr-2">
                             <AlertTriangle size={16} color="#ef4444" />
                         </View>
-                        <Text className="text-red-600 text-sm font-medium">AI detected synthetic nitrogen spike</Text>
+                        <Text className="text-red-600 text-sm font-medium">AI detected synthetic chemical spike</Text>
                     </View>
                 )}
 
@@ -104,7 +122,7 @@ const MyFarmersDashboard = ({ route }) => {
                     <Text className="text-xs text-slate-400">Sync: {item.lastSync}</Text>
                     <TouchableOpacity
                         className="flex-row items-center bg-[#003366] px-3 py-2 rounded-md active:bg-[#002244]"
-                        onPress={() => handleViewReport(item.farmName)}
+                        onPress={() => handleViewReport(item)}
                     >
                         <View className="mr-2">
                             <FileText size={14} color="white" />
@@ -154,13 +172,20 @@ const MyFarmersDashboard = ({ route }) => {
             </View>
 
             {/* List */}
-            <FlatList
-                data={filteredFarmers}
-                renderItem={renderFarmerCard}
-                keyExtractor={item => item.id}
-                contentContainerStyle={{ padding: 16 }}
-                showsVerticalScrollIndicator={false}
-            />
+            {loading ? (
+                <View className="flex-1 justify-center items-center mt-10">
+                    <ActivityIndicator size="large" color="#003366" />
+                    <Text className="mt-4 text-slate-500">Loading farmer data...</Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={filteredFarmers}
+                    renderItem={renderFarmerCard}
+                    keyExtractor={item => item.id}
+                    contentContainerStyle={{ padding: 16 }}
+                    showsVerticalScrollIndicator={false}
+                />
+            )}
         </View>
     );
 };

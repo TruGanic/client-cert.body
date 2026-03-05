@@ -34,7 +34,10 @@ const AgentLoginScreen = () => {
             await AsyncStorage.setItem('agentToken', token);
             await AsyncStorage.setItem('agentProfile', JSON.stringify(response.data.profile));
 
-            navigation.replace('AgentDashboard', { agentName: response.data.profile.fullName });
+            navigation.replace('AgentDashboard', {
+                agentName: response.data.profile.fullName,
+                agentRegion: response.data.profile.assignedRegion || response.data.profile.region
+            });
 
         } catch (error) {
             console.error('Login Error:', error.response?.data || error.message);

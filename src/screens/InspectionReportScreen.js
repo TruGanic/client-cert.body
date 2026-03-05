@@ -43,6 +43,25 @@ const InspectionReportScreen = ({ route, navigation }) => {
         );
     }
 
+    // Extract the Month from the labels
+    const getChartMonth = () => {
+        if (!reportData?.chartData?.labels?.length) return '';
+        const firstLabel = reportData.chartData.labels[0];
+        // Expecting format like "Mar 04", extract "Mar"
+        const parts = firstLabel.split(' ');
+        if (parts.length > 0) return parts[0];
+        return '';
+    };
+
+    // Keep only the Date part
+    const formatXLabel = (label) => {
+        const parts = label.split(' ');
+        if (parts.length > 1) return parts[1]; // Return "04" from "Mar 04"
+        return label;
+    };
+
+    const chartMonth = getChartMonth();
+
     return (
         <ScrollView className="flex-1 bg-slate-50 p-4">
             {/* Header Info */}
@@ -89,18 +108,21 @@ const InspectionReportScreen = ({ route, navigation }) => {
 
             {/* Chart */}
             <View className="bg-white rounded-xl p-5 mb-6 shadow-sm border border-slate-200">
-                <View className="flex-row items-center justify-between mb-2">
+                <View className="flex-row items-center justify-between mb-1">
                     <Text className="text-[#003366] font-bold text-lg">Nitrogen Levels (ppm)</Text>
                     <Activity color="#64748b" size={20} />
                 </View>
+                {chartMonth ? <Text className="text-slate-500 text-sm mb-3">Month: {chartMonth}</Text> : null}
 
                 {reportData.chartData && reportData.chartData.labels.length > 0 ? (
                     <LineChart
                         data={reportData.chartData}
+                        formatXLabel={formatXLabel}
                         width={Dimensions.get('window').width - 75} // screen width minus padding
-                        height={220}
+                        height={230} // Restoring normal height
                         yAxisSuffix=""
                         yAxisInterval={1}
+                        verticalLabelRotation={0} // Remove rotation since terms are much shorter now
                         chartConfig={{
                             backgroundColor: '#ffffff',
                             backgroundGradientFrom: '#ffffff',

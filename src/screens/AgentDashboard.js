@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert, ActivityIndicator, RefreshControl } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LogOut, AlertTriangle, CheckCircle, ChevronRight, FileText } from 'lucide-react-native';
@@ -7,11 +7,31 @@ import { apiClient } from '../config/apiConfig';
 
 const MyFarmersDashboard = ({ route }) => {
     const navigation = useNavigation();
-    const { agentName } = route.params || { agentName: 'Amal' };
+    const { agentName: routeAgentName, agentRegion: routeAgentRegion } = route.params || {};
+    const [authAgentName, setAuthAgentName] = useState(routeAgentName || 'Agent');
+    const [agentRegion, setAgentRegion] = useState(routeAgentRegion || 'Loading region...');
     const [filter, setFilter] = useState('All');
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [farmers, setFarmers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
+
+    useEffect(() => {
+        const loadProfile = async () => {
+            try {
+                const profileStr = await AsyncStorage.getItem('agentProfile');
+                if (profileStr) {
+                    const profile = JSON.parse(profileStr);
+                    if (profile.fullName) setAuthAgentName(profile.fullName);
+                    if (profile.assignedRegion) setAgentRegion(profile.assignedRegion);
+                    else if (profile.region) setAgentRegion(profile.region); // fallback if it's stored as region
+                }
+            } catch (error) {
+                console.error('Error loading profile from AsyncStorage:', error);
+            }
+        };
+        loadProfile();
+    }, []);
 
     const fetchDashboardStats = async () => {
         try {
@@ -23,6 +43,19 @@ const MyFarmersDashboard = ({ route }) => {
             Alert.alert('Error', 'Failed to fetch dashboard data.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        try {
+            const response = await apiClient.get('/dashboard-stats');
+            setFarmers(response.data);
+        } catch (error) {
+            console.error('Error refreshing dashboard:', error);
+            Alert.alert('Error', 'Failed to refresh dashboard data.');
+        } finally {
+            setRefreshing(false);
         }
     };
 
@@ -140,8 +173,8 @@ const MyFarmersDashboard = ({ route }) => {
             <View className="bg-[#003366] pt-12 pb-6 px-6 shadow-md">
                 <View className="flex-row justify-between items-center mb-2">
                     <View>
-                        <Text className="text-white text-2xl font-bold">Welcome, {agentName}</Text>
-                        <Text className="text-slate-300 text-sm">Region: Uva Province</Text>
+                        <Text className="text-white text-2xl font-bold">Welcome, {authAgentName}</Text>
+                        <Text className="text-slate-300 text-sm">Region: {agentRegion}</Text>
                     </View>
                     <TouchableOpacity onPress={handleLogout} disabled={isLoggingOut} className="bg-white/10 p-2 rounded-full">
                         {isLoggingOut ? (
@@ -184,6 +217,14 @@ const MyFarmersDashboard = ({ route }) => {
                     keyExtractor={item => item.id}
                     contentContainerStyle={{ padding: 16 }}
                     showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            colors={['#003366']} // Android
+                            tintColor="#003366" // iOS
+                        />
+                    }
                 />
             )}
         </View>

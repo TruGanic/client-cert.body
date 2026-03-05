@@ -69,8 +69,8 @@ client-cert.body/
 │       ├── AgentDashboard.js
 │       ├── AgentLoginScreen.js
 │       ├── AgentRegistrationScreen.js
-│       ├── HomeScreen.js
 │       └── InspectionReportScreen.js
+│       
 ├── assets/               # Static assets (images, fonts)
 ├── App.js                # Entry point
 ├── app.json              # Expo configuration

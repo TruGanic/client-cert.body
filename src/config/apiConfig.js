@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Using 10.0.2.2 for Android Emulator. Use localhost for iOS simulator or your local IP (e.g., http://192.168.1.5:3001) for physical devices.
-export const API_BASE_URL = 'http://10.0.2.2:3001/api/agents';
+export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.0.2.2:3001/api/agents';
 
 export const apiClient = axios.create({
     baseURL: API_BASE_URL,

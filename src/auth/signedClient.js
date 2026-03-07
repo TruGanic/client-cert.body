@@ -35,6 +35,10 @@ export function createSignableMessage(
     "connection",
     "user-agent",
     "content-length",
+    "if-none-match",
+    "if-modified-since",
+    "if-match",
+    "if-range",
   ]);
 
   const otherHeaders = {};
@@ -47,6 +51,13 @@ export function createSignableMessage(
     }
   }
 
+  // Canonical key order so payload string matches server (signature verification)
+  const sortedHeaderKeys = Object.keys(otherHeaders).sort();
+  const canonicalHeaders = {};
+  for (const k of sortedHeaderKeys) {
+    canonicalHeaders[k] = otherHeaders[k];
+  }
+
   const normalizedBody =
     body !== undefined && body !== null ? body : {};
 
@@ -56,7 +67,7 @@ export function createSignableMessage(
     timestamp: timestamp,
     nonce: nonce,
     body: normalizedBody,
-    headers: otherHeaders,
+    headers: canonicalHeaders,
   };
 
   return JSON.stringify(payload);
@@ -91,8 +102,13 @@ export async function generateAuthHeaders(config) {
   const timestamp = providedTimestamp || new Date().toISOString();
   const nonce = providedNonce || (await generateNonce());
 
+  // Only include content-type in signed payload when request has a body (server matches this rule)
+  const hasBody =
+    body !== undefined &&
+    body !== null &&
+    (typeof body !== "object" || Object.keys(body).length > 0);
   const requestHeaders = {
-    "content-type": "application/json",
+    ...(hasBody ? { "content-type": "application/json" } : {}),
     "x-timestamp": timestamp,
     "x-nonce": nonce,
     ...additionalHeaders,
@@ -181,11 +197,18 @@ export async function signedRequest(method, path, body, additionalHeaders) {
 
   const { headers } = await generateAuthHeaders(config);
   const url = `${gatewayUrl}${path}`;
+  const hasBody =
+    body !== undefined &&
+    body !== null &&
+    (typeof body !== "object" || Object.keys(body).length > 0);
   const r = await axios({
     method,
     url,
     data: body,
-    headers: { ...headers, "Content-Type": "application/json" },
+    headers: {
+      ...headers,
+      ...(hasBody ? { "Content-Type": "application/json" } : {}),
+    },
   });
   return { data: r.data, status: r.status };
 }

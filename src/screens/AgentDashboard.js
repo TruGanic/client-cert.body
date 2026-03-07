@@ -37,7 +37,12 @@ const MyFarmersDashboard = ({ route }) => {
         try {
             setLoading(true);
             const response = await apiClient.get('/dashboard-stats');
-            setFarmers(response.data);
+            // Reverse to show newest records at the top
+            if (Array.isArray(response.data)) {
+                setFarmers(response.data.reverse());
+            } else {
+                setFarmers(response.data);
+            }
         } catch (error) {
             console.error('Error fetching dashboard stats:', error);
             Alert.alert('Error', 'Failed to fetch dashboard data.');
@@ -50,8 +55,12 @@ const MyFarmersDashboard = ({ route }) => {
         setRefreshing(true);
         try {
             const response = await apiClient.get('/dashboard-stats');
-            setFarmers(response.data);
-        } catch (error) {
+            // Reverse to show newest records at the top
+            if (Array.isArray(response.data)) {
+                setFarmers(response.data.reverse());
+            } else {
+                setFarmers(response.data);
+            }
             console.error('Error refreshing dashboard:', error);
             Alert.alert('Error', 'Failed to refresh dashboard data.');
         } finally {

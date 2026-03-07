@@ -1,5 +1,9 @@
 import { signedRequest } from "../auth/signedClient";
 
+// Required in .env (use EXPO_PUBLIC_ prefix so Expo exposes them):
+//   EXPO_PUBLIC_GATEWAY_URL, EXPO_PUBLIC_CLIENT_DID, EXPO_PUBLIC_CLIENT_PRIVATE_KEY (hex, no 0x)
+// VC for the DID must include scope write:agent-server. See .env.example.
+
 const AGENT_PATH_PREFIX = "/api/agents";
 
 // Build full gateway path so screens keep using relative paths (e.g. /dashboard-stats, /login)

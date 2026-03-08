@@ -16,6 +16,7 @@
     "buffer": "^6.0.3",
     "elliptic": "^6.0.0",
     "expo": "~54.0.33",
+    "expo-build-properties": "~1.0.10",
     "expo-crypto": "~15.0.4",
     "expo-status-bar": "~3.0.9",
     "lucide-react-native": "^0.555.0",
